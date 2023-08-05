@@ -2,9 +2,13 @@ package anagram
 
 import "errors"
 
+type AnagramFinderFactoryInterface interface {
+	CreateAnagramFinder(algorithm string) (AnagramFinder, error)
+}
+
 type AnagramFinderFactory struct{}
 
-func NewAnagramFinderFactory() *AnagramFinderFactory {
+func NewAnagramFinderFactory() AnagramFinderFactoryInterface {
 	return &AnagramFinderFactory{}
 }
 
