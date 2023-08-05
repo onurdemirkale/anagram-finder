@@ -1,10 +1,9 @@
 package anagram
 
 import (
+	"reflect"
 	"sort"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSortMapAnagramFinder_FindAnagrams(t *testing.T) {
@@ -48,7 +47,11 @@ func TestSortMapAnagramFinder_FindAnagrams(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			smaf := NewSortMapAnagramFinder()
-			actual, _ := smaf.FindAnagrams(tc.words)
+			actual, err := smaf.FindAnagrams(tc.words)
+
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
 
 			// sort the anagram groups to ensure ElementsMatch works correctly
 			for i := range actual {
@@ -59,7 +62,9 @@ func TestSortMapAnagramFinder_FindAnagrams(t *testing.T) {
 				sort.Strings(tc.expected[i])
 			}
 
-			assert.ElementsMatch(t, tc.expected, actual)
+			if !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected %v, got %v", tc.expected, actual)
+			}
 		})
 	}
 }
