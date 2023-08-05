@@ -2,15 +2,17 @@ package inputsource
 
 import "fmt"
 
+type InputSourceFactoryInterface interface {
+	CreateInputSource(inputType string, inputData string) (InputSource, error)
+}
+
 type InputSourceFactory struct{}
 
-func NewInputSourceFactory() *InputSourceFactory {
+func NewInputSourceFactory() InputSourceFactoryInterface {
 	return &InputSourceFactory{}
 }
 
 func (f *InputSourceFactory) CreateInputSource(inputType string, inputData string) (InputSource, error) {
-
-	fmt.Println(inputType)
 	switch inputType {
 	case "http":
 		return NewHttpBodyInputSource(inputData), nil
