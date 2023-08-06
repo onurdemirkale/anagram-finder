@@ -7,16 +7,18 @@ import (
 )
 
 const (
+	inputTypeFile  = "http_file"
 	inputTypeData  = "http"
 	algorithmBasic = "basic"
 )
 
 var (
-	supportedInputTypes     = []string{"http"}
+	supportedInputTypes     = []string{"http", "http_file"}
 	supportedAlgorithms     = []string{"basic"}
 	errInvalidInput         = errors.New("invalid input provided")
 	errInvalidInputType     = fmt.Errorf("invalid input type. supported types: %s", strings.Join(supportedInputTypes, ", "))
 	errInvalidAlgorithmType = fmt.Errorf("invalid algorithm type. supported algorithms: %s", strings.Join(supportedAlgorithms, ", "))
+	errInvalidFileInput     = errors.New("input data should be empty for file input type")
 )
 
 type AnagramRequest struct {
@@ -32,6 +34,7 @@ func (req *AnagramRequest) Validate() error {
 
 	supportedTypes := map[string]bool{
 		inputTypeData: true,
+		inputTypeFile: true,
 	}
 
 	if !supportedTypes[req.InputType] {
@@ -42,17 +45,17 @@ func (req *AnagramRequest) Validate() error {
 		return errInvalidAlgorithmType
 	}
 
+	// todo: improve file and http body input validations
 	switch req.InputType {
 	case inputTypeData:
-		if !isValidData(req.InputData) {
+		if !strings.Contains(req.InputData, ",") {
 			return errInvalidInput
+		}
+	case inputTypeFile:
+		if req.InputData != "" {
+			return errInvalidFileInput
 		}
 	}
 
 	return nil
-}
-
-// used for validating data in http body
-func isValidData(data string) bool {
-	return strings.Contains(data, ",")
 }
