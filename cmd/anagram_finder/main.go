@@ -13,7 +13,13 @@ func main() {
 	aff := anagram.NewAnagramFinderFactory()
 	handler := api.NewAnagramHandler(isf, aff)
 
+	http.HandleFunc("/healthz", healthCheckHandler)
 	http.HandleFunc("/anagram", handler.FindAnagrams)
 	http.ListenAndServe(":8080", nil)
 
+}
+
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
