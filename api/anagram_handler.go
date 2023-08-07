@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/onurdemirkale/anagram-finder/pkg/anagram"
@@ -69,11 +68,7 @@ func (h *AnagramHandler) FindAnagrams(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.InputType == inputTypeFile {
-		h.serveAnagramsAsFile(w, r, anagramGroups)
-	} else {
-		h.serveAnagramsAsJSON(w, anagramGroups)
-	}
+	serveResponse(w, anagramGroups, http.StatusOK, "")
 }
 
 func (h *AnagramHandler) parseRequest(r *http.Request) (inputsource.InputSource, AnagramRequest, error) {
@@ -109,28 +104,4 @@ func (h *AnagramHandler) parseRequest(r *http.Request) (inputsource.InputSource,
 	default:
 		return nil, req, fmt.Errorf(errUnsupportedContentType)
 	}
-}
-
-func (h *AnagramHandler) serveAnagramsAsFile(w http.ResponseWriter, r *http.Request, groups [][]string) {
-	tmpFile, err := os.CreateTemp("", "anagram-output-*.txt")
-	if err != nil {
-		logAndRespondError(w, err, http.StatusInternalServerError, errProcessing)
-		return
-	}
-	defer os.Remove(tmpFile.Name())
-
-	for _, group := range groups {
-		line := strings.Join(group, ", ")
-		fmt.Fprintln(tmpFile, line)
-	}
-	tmpFile.Close()
-
-	w.Header().Set("Content-Disposition", "attachment; filename=anagram-output.txt")
-	w.Header().Set("Content-Type", "text/plain")
-	http.ServeFile(w, r, tmpFile.Name())
-}
-
-func (h *AnagramHandler) serveAnagramsAsJSON(w http.ResponseWriter, groups [][]string) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(groups)
 }
