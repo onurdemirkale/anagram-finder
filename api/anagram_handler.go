@@ -32,27 +32,7 @@ func (h *AnagramHandler) FindAnagrams(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err != nil {
-		status, errMsg := handleError(err)
-		serveResponse(w, nil, status, errMsg)
-		return
-	}
-
-	anagramFinder, err := h.anagramFinderFactory.CreateAnagramFinder(req.Algorithm)
-	if err != nil {
-		status, errMsg := handleError(err)
-		serveResponse(w, nil, status, errMsg)
-		return
-	}
-
-	words, err := inputSource.GetWords()
-	if err != nil {
-		status, errMsg := handleError(err)
-		serveResponse(w, nil, status, errMsg)
-		return
-	}
-
-	anagramGroups, err := anagramFinder.FindAnagrams(words)
+	anagramGroups, err := h.processAnagrams(req, inputSource)
 	if err != nil {
 		status, errMsg := handleError(err)
 		serveResponse(w, nil, status, errMsg)
@@ -62,6 +42,7 @@ func (h *AnagramHandler) FindAnagrams(w http.ResponseWriter, r *http.Request) {
 	serveResponse(w, anagramGroups, http.StatusOK, "")
 }
 
+// todo: this method does not adhere to SOLID (SRP), refactor
 func (h *AnagramHandler) parseRequest(r *http.Request) (inputsource.InputSource, AnagramRequest, error) {
 	var req AnagramRequest
 	contentType := r.Header.Get("Content-Type")
@@ -103,4 +84,23 @@ func (h *AnagramHandler) parseRequest(r *http.Request) (inputsource.InputSource,
 	default:
 		return nil, req, errors.New(ErrUnsupportedContentType)
 	}
+}
+
+func (h *AnagramHandler) processAnagrams(req AnagramRequest, inputSource inputsource.InputSource) ([][]string, error) {
+	anagramFinder, err := h.anagramFinderFactory.CreateAnagramFinder(req.Algorithm)
+	if err != nil {
+		return nil, err
+	}
+
+	words, err := inputSource.GetWords()
+	if err != nil {
+		return nil, err
+	}
+
+	anagramGroups, err := anagramFinder.FindAnagrams(words)
+	if err != nil {
+		return nil, err
+	}
+
+	return anagramGroups, nil
 }
