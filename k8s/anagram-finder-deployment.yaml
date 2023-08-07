@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anagram-finder-deployment
+  labels:
+    app: anagram-finder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: anagram-finder
+  template:
+    metadata:
+      labels:
+        app: anagram-finder
+    spec:
+      containers:
+        - name: anagram-finder
+          image: rhonur/anagram-finder
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
