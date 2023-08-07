@@ -2,20 +2,12 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
+	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/onurdemirkale/anagram-finder/pkg/anagram"
 	"github.com/onurdemirkale/anagram-finder/pkg/inputsource"
-)
-
-const (
-	errProcessing             = "an error occurred while processing your request"
-	errInvalidFormat          = "invalid request format"
-	errInvalidFile            = "failed to read file"
-	errUnsupportedContentType = "unsupported content type"
 )
 
 type AnagramHandler struct {
@@ -30,41 +22,40 @@ func NewAnagramHandler(isf inputsource.InputSourceFactoryInterface, aff anagram.
 	}
 }
 
-func logAndRespondError(w http.ResponseWriter, err error, status int, userErrorMessage string) {
-	log.Printf("handler error: %v", err)
-	http.Error(w, userErrorMessage, status)
-}
-
 func (h *AnagramHandler) FindAnagrams(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	inputSource, req, err := h.parseRequest(r)
 	if err != nil {
-		logAndRespondError(w, err, http.StatusBadRequest, err.Error())
+		status, errMsg := handleError(err)
+		serveResponse(w, nil, status, errMsg)
 		return
 	}
 
-	err = req.Validate()
 	if err != nil {
-		logAndRespondError(w, err, http.StatusBadRequest, err.Error())
+		status, errMsg := handleError(err)
+		serveResponse(w, nil, status, errMsg)
 		return
 	}
 
 	anagramFinder, err := h.anagramFinderFactory.CreateAnagramFinder(req.Algorithm)
 	if err != nil {
-		logAndRespondError(w, err, http.StatusBadRequest, errProcessing)
+		status, errMsg := handleError(err)
+		serveResponse(w, nil, status, errMsg)
 		return
 	}
 
 	words, err := inputSource.GetWords()
 	if err != nil {
-		logAndRespondError(w, err, http.StatusInternalServerError, errProcessing)
+		status, errMsg := handleError(err)
+		serveResponse(w, nil, status, errMsg)
 		return
 	}
 
 	anagramGroups, err := anagramFinder.FindAnagrams(words)
 	if err != nil {
-		logAndRespondError(w, err, http.StatusInternalServerError, errProcessing)
+		status, errMsg := handleError(err)
+		serveResponse(w, nil, status, errMsg)
 		return
 	}
 
@@ -79,19 +70,27 @@ func (h *AnagramHandler) parseRequest(r *http.Request) (inputsource.InputSource,
 	case strings.Contains(contentType, "multipart/form-data"):
 		file, _, err := r.FormFile("file")
 		if err != nil {
-			return nil, req, fmt.Errorf("%s: %v", errInvalidFile, err)
+			return nil, req, errors.New(ErrInvalidFileInput)
 		}
 		defer file.Close()
 
 		req.InputType = r.FormValue("inputType")
 		req.Algorithm = r.FormValue("algorithm")
 
+		if err := req.validate(); err != nil {
+			return nil, req, err
+		}
+
 		return inputsource.NewHttpFileInputSource(file), req, nil
 
 	case strings.Contains(contentType, "application/json"):
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			return nil, req, fmt.Errorf("%s: %v", errInvalidFormat, err)
+			return nil, req, errors.New(ErrInvalidFormat)
+		}
+
+		if err := req.validate(); err != nil {
+			return nil, req, err
 		}
 
 		inputSource, err := h.inputSourceFactory.CreateInputSource(req.InputType, req.InputData)
@@ -102,6 +101,6 @@ func (h *AnagramHandler) parseRequest(r *http.Request) (inputsource.InputSource,
 		return inputSource, req, nil
 
 	default:
-		return nil, req, fmt.Errorf(errUnsupportedContentType)
+		return nil, req, errors.New(ErrUnsupportedContentType)
 	}
 }
