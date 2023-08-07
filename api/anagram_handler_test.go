@@ -2,12 +2,12 @@ package api
 
 import (
 	"bytes"
-	"errors"
-	"io"
+	"encoding/json"
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"os"
+	"sort"
 	"strings"
 	"testing"
 
@@ -15,96 +15,67 @@ import (
 	"github.com/onurdemirkale/anagram-finder/pkg/inputsource"
 )
 
-// todo: parameterize mocks
-type MockInputSource struct{}
-
-func (m *MockInputSource) GetWords() ([]string, error) {
-	return []string{"listen", "enlist", "inlets", "cat", "silent", "tac", "nag a ram", "anagram"}, nil
-}
-
-type MockInputSourceFactory struct{}
-
-func (m *MockInputSourceFactory) CreateInputSource(inputType string, inputData interface{}) (inputsource.InputSource, error) {
-	if inputType == "error" {
-		return nil, errors.New("InputSourceFactory error")
-	}
-	return &MockInputSource{}, nil
-}
-
-type MockAnagramFinder struct{}
-
-func (m *MockAnagramFinder) FindAnagrams(words []string) ([][]string, error) {
-	return [][]string{{"listen", "enlist", "inlets", "silent"}, {"cat", "tac"}, {"nag a ram", "anagram"}}, nil
-}
-
-type MockAnagramFinderFactory struct{}
-
-func (m *MockAnagramFinderFactory) CreateAnagramFinder(algo string) (anagram.AnagramFinder, error) {
-	if algo == "error" {
-		return nil, errors.New("AnagramFinderFactory error")
-	}
-	return &MockAnagramFinder{}, nil
-}
-
 func TestFindAnagrams(t *testing.T) {
 	tests := []struct {
 		name           string
 		body           string
 		expectedCode   int
 		expectedOutput string
-		expectedError  error
+		expectedError  string
 	}{
 		{
 			name:           "Valid Request",
-			body:           `{"inputType": "http", "inputData": "listen,enlist,inlets,cat,silent,tac", "algorithm": "basic"}`,
+			body:           `{"inputType": "http", "inputData": "listen,enlist,inlets,cat,silent,tac,nag a ram,anagram", "algorithm": "basic"}`,
 			expectedCode:   http.StatusOK,
-			expectedOutput: `[["listen","enlist","inlets","silent"],["cat","tac"],["nag a ram","anagram"]]`,
+			expectedOutput: "{\"anagramGroups\":[[\"listen\",\"enlist\",\"inlets\",\"silent\"],[\"cat\",\"tac\"],[\"nag a ram\",\"anagram\"]]}\n",
 		},
 		{
 			name:          "Invalid Input Type",
 			body:          `{"inputType": "invalid", "inputData": "listen,enlist,inlets,silent", "algorithm": "basic"}`,
 			expectedCode:  http.StatusBadRequest,
-			expectedError: errInvalidInputType,
+			expectedError: fmt.Sprintf("{\"anagramGroups\":null,\"error\":\"%s\"}", ErrInvalidInputType),
 		},
 		{
 			name:          "Invalid Algorithm",
 			body:          `{"inputType": "http", "inputData": "listen,enlist,inlets,silent", "algorithm": "invalid"}`,
 			expectedCode:  http.StatusBadRequest,
-			expectedError: errInvalidAlgorithmType,
+			expectedError: fmt.Sprintf("{\"anagramGroups\":null,\"error\":\"%s\"}", ErrInvalidAlgorithmType),
 		},
 		{
 			name:          "Invalid Input Data",
 			body:          `{"inputType": "http", "inputData": "invalidData", "algorithm": "basic"}`,
 			expectedCode:  http.StatusBadRequest,
-			expectedError: errInvalidInput,
+			expectedError: fmt.Sprintf("{\"anagramGroups\":null,\"error\":\"%s\"}", ErrInvalidInput),
 		},
 	}
 
-	handler := NewAnagramHandler(&MockInputSourceFactory{}, &MockAnagramFinderFactory{})
+	handler := NewAnagramHandler(&inputsource.InputSourceFactory{}, &anagram.AnagramFinderFactory{})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest("POST", "/anagram", bytes.NewBuffer([]byte(tt.body)))
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest("POST", "/anagram", bytes.NewBuffer([]byte(tc.body)))
 			req.Header.Set("Content-Type", "application/json")
 			rr := httptest.NewRecorder()
 
 			handler.FindAnagrams(rr, req)
 
-			if status := rr.Code; status != tt.expectedCode {
-				t.Errorf("handler returned wrong status code: got %v want %v", status, tt.expectedCode)
+			if status := rr.Code; status != tc.expectedCode {
+				t.Errorf("handler returned wrong status code: got %v want %v", status, tc.expectedCode)
 			}
 
-			actual := strings.TrimSpace(rr.Body.String())
+			actual := rr.Body.String()
 
-			if tt.expectedError != nil {
-				expectedError := tt.expectedError.Error()
+			if tc.expectedError != "" {
+				actualError := strings.TrimSpace(actual)
 
-				if actual != expectedError {
-					t.Errorf("handler returned unexpected error: got %q want %q", actual, expectedError)
+				if actualError != tc.expectedError {
+					t.Errorf("handler returned unexpected error: got %q want %q", actualError, tc.expectedError)
 				}
-			} else if tt.expectedOutput != "" {
-				if actual != tt.expectedOutput {
-					t.Errorf("handler returned unexpected body: got %q want %q", actual, tt.expectedOutput)
+			} else {
+				actualSorted := sortJsonResponse(actual)
+				expectedSorted := sortJsonResponse(tc.expectedOutput)
+				if actualSorted != expectedSorted {
+					t.Errorf("handler returned unexpected file content: got %q want %q", actualSorted, expectedSorted)
 				}
 			}
 		})
@@ -124,7 +95,7 @@ func TestFindAnagrams_FileInput(t *testing.T) {
 		inputType          string
 		algorithm          string
 		expectedCode       int
-		expectedErr        error
+		expectedError      error
 		expectedFileOutput string
 	}{
 		{
@@ -133,34 +104,40 @@ func TestFindAnagrams_FileInput(t *testing.T) {
 			inputType:          "http_file",
 			algorithm:          "basic",
 			expectedCode:       http.StatusOK,
-			expectedErr:        nil,
-			expectedFileOutput: "listen, enlist, inlets, silent\ncat, tac\nnag a ram, anagram\n",
+			expectedError:      nil,
+			expectedFileOutput: "{\"anagramGroups\":[[\"listen\",\"enlist\",\"inlets\",\"silent\"],[\"cat\",\"tac\"],[\"nag a ram\",\"anagram\"]]}\n",
 		},
 	}
 
-	handler := NewAnagramHandler(&MockInputSourceFactory{}, &MockAnagramFinderFactory{})
+	handler := NewAnagramHandler(&inputsource.InputSourceFactory{}, &anagram.AnagramFinderFactory{})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			req := generateMultipartRequest(tt.fileContents, tt.inputType, tt.algorithm)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := generateMultipartRequest(tc.fileContents, tc.inputType, tc.algorithm)
 			rr := httptest.NewRecorder()
 
 			handler.FindAnagrams(rr, req)
 
-			if status := rr.Code; status != tt.expectedCode {
-				t.Errorf("handler returned wrong status code: got %v want %v", status, tt.expectedCode)
+			if status := rr.Code; status != tc.expectedCode {
+				t.Errorf("handler returned wrong status code: got %v want %v", status, tc.expectedCode)
 			}
 
-			if tt.expectedErr != nil {
-				actualErr := strings.TrimSpace(rr.Body.String())
-				expectedErr := tt.expectedErr.Error()
+			actual := rr.Body.String()
+
+			if tc.expectedError != nil {
+				actualErr := strings.TrimSpace(actual)
+				expectedErr := tc.expectedError.Error()
 
 				if actualErr != expectedErr {
 					t.Errorf("handler returned unexpected error: got %q want %q", actualErr, expectedErr)
 				}
 			}
 
-			validateFileContent(t, rr, tt.expectedFileOutput)
+			actualSorted := sortJsonResponse(actual)
+			expectedSorted := sortJsonResponse(tc.expectedFileOutput)
+			if actualSorted != expectedSorted {
+				t.Errorf("handler returned unexpected file content: got %q want %q", actualSorted, expectedSorted)
+			}
 		})
 	}
 }
@@ -181,29 +158,20 @@ func generateMultipartRequest(fileContents, inputType, algorithm string) *http.R
 	return req
 }
 
-func validateFileContent(t *testing.T, rr *httptest.ResponseRecorder, expectedFileOutput string) {
-	tempFile, err := os.CreateTemp("", "test-output-*.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.Remove(tempFile.Name())
+func sortJsonResponse(jsonStr string) string {
+	var response AnagramResponse
+	json.Unmarshal([]byte(jsonStr), &response)
 
-	_, err = io.Copy(tempFile, rr.Result().Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr.Result().Body.Close()
-
-	tempFile.Seek(0, 0)
-	fileContentBytes, err := os.ReadFile(tempFile.Name())
-	if err != nil {
-		t.Fatal(err)
+	// sort the anagrams within each group
+	for _, group := range response.AnagramGroups {
+		sort.Strings(group)
 	}
 
-	if expectedFileOutput != "" {
-		actual := string(fileContentBytes)
-		if actual != expectedFileOutput {
-			t.Errorf("handler returned unexpected file content: got %q want %q", actual, expectedFileOutput)
-		}
-	}
+	// sort the groups themselves
+	sort.Slice(response.AnagramGroups, func(i, j int) bool {
+		return strings.Join(response.AnagramGroups[i], ",") < strings.Join(response.AnagramGroups[j], ",")
+	})
+
+	output, _ := json.Marshal(response)
+	return string(output)
 }
