@@ -25,7 +25,7 @@ func TestFindAnagrams(t *testing.T) {
 	}{
 		{
 			name:           "Valid Request",
-			body:           `{"inputType": "http", "inputData": "listen,enlist,inlets,cat,silent,tac,nag a ram,anagram", "algorithm": "basic"}`,
+			body:           `{"inputType": "http_body", "inputData": "listen,enlist,inlets,cat,silent,tac,nag a ram,anagram", "algorithm": "basic"}`,
 			expectedCode:   http.StatusOK,
 			expectedOutput: "{\"anagramGroups\":[[\"listen\",\"enlist\",\"inlets\",\"silent\"],[\"cat\",\"tac\"],[\"nag a ram\",\"anagram\"]]}\n",
 		},
@@ -37,13 +37,13 @@ func TestFindAnagrams(t *testing.T) {
 		},
 		{
 			name:          "Invalid Algorithm",
-			body:          `{"inputType": "http", "inputData": "listen,enlist,inlets,silent", "algorithm": "invalid"}`,
+			body:          `{"inputType": "http_body", "inputData": "listen,enlist,inlets,silent", "algorithm": "invalid"}`,
 			expectedCode:  http.StatusBadRequest,
 			expectedError: fmt.Sprintf("{\"anagramGroups\":null,\"error\":\"%s\"}", ErrInvalidAlgorithmType),
 		},
 		{
 			name:          "Invalid Input Data",
-			body:          `{"inputType": "http", "inputData": "invalidData", "algorithm": "basic"}`,
+			body:          `{"inputType": "http_body", "inputData": "invalidData", "algorithm": "basic"}`,
 			expectedCode:  http.StatusBadRequest,
 			expectedError: fmt.Sprintf("{\"anagramGroups\":null,\"error\":\"%s\"}", ErrInvalidInput),
 		},

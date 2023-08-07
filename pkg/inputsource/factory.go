@@ -17,7 +17,7 @@ func NewInputSourceFactory() InputSourceFactoryInterface {
 
 func (f *InputSourceFactory) CreateInputSource(inputType string, inputData interface{}) (InputSource, error) {
 	switch inputType {
-	case "http":
+	case "http_body":
 		return NewHttpBodyInputSource(inputData.(string)), nil
 	case "http_file":
 		return NewHttpFileInputSource(inputData.(multipart.File)), nil

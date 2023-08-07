@@ -7,7 +7,7 @@ import (
 
 const (
 	inputTypeFile  = "http_file"
-	inputTypeData  = "http"
+	inputTypeBody  = "http_body"
 	algorithmBasic = "basic"
 )
 
@@ -35,7 +35,7 @@ func (req *AnagramRequest) validate() error {
 
 func (req *AnagramRequest) validateInputType() error {
 	supportedTypes := map[string]bool{
-		inputTypeData: true,
+		inputTypeBody: true,
 		inputTypeFile: true,
 	}
 
@@ -61,7 +61,7 @@ func (req *AnagramRequest) validateAlgorithm() error {
 func (req *AnagramRequest) validateInputData() error {
 	// todo: improve file and http body input validations
 	switch req.InputType {
-	case inputTypeData:
+	case inputTypeBody:
 		if req.InputData == "" || len(strings.Split(req.InputData, ",")) < 2 {
 			return errors.New(ErrInvalidInput)
 		}
