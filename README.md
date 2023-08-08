@@ -134,29 +134,29 @@ http://localhost:8080/anagram \
 
 **Total Coverage**: 79.8%
 
-anagram-finder/api/anagram_handler.go:18:			NewAnagramHandler	100.0%
-anagram-finder/api/anagram_handler.go:25:			FindAnagrams		75.0%
-anagram-finder/api/anagram_handler.go:46:			parseRequest		77.3%
-anagram-finder/api/anagram_handler.go:89:			processAnagrams		70.0%
-anagram-finder/api/anagram_request.go:20:			validate		100.0%
-anagram-finder/api/anagram_request.go:36:			validateInputType	100.0%
-anagram-finder/api/anagram_request.go:49:			validateAlgorithm	100.0%
-anagram-finder/api/anagram_request.go:61:			validateInputData	83.3%
-anagram-finder/api/anagram_response.go:15:			serveResponse		100.0%
-anagram-finder/api/error_handler.go:34:			handleError		75.0%
-anagram-finder/pkg/anagram/factory.go:11:			NewAnagramFinderFactory	0.0%
-anagram-finder/pkg/anagram/factory.go:15:			CreateAnagramFinder	0.0%
-anagram-finder/pkg/anagram/sort_map_anagram_finder.go:11:	NewSortMapAnagramFinder	100.0%
-anagram-finder/pkg/anagram/sort_map_anagram_finder.go:19:	FindAnagrams		100.0%
-anagram-finder/pkg/anagram/sort_map_anagram_finder.go:43:	sortWord		100.0%
-anagram-finder/pkg/inputsource/factory.go:14:			NewInputSourceFactory	0.0%
-anagram-finder/pkg/inputsource/factory.go:18:			CreateInputSource	0.0%
-anagram-finder/pkg/inputsource/http_body_input_source.go:11:	NewHttpBodyInputSource	100.0%
-anagram-finder/pkg/inputsource/http_body_input_source.go:16:	GetWords		100.0%
-anagram-finder/pkg/inputsource/http_file_input_source.go:12:	NewHttpFileInputSource	100.0%
-anagram-finder/pkg/inputsource/http_file_input_source.go:16:	GetWords		87.5%
-anagram-finder/pkg/inputsource/http_url_input_source.go:15:	NewHttpUrlInputSource	100.0%
-anagram-finder/pkg/inputsource/http_url_input_source.go:19:	GetWords		84.6%
+- anagram-finder/api/anagram_handler.go:18:			NewAnagramHandler	100.0%
+- anagram-finder/api/anagram_handler.go:25:			FindAnagrams		75.0%
+- anagram-finder/api/anagram_handler.go:46:			parseRequest		77.3%
+- anagram-finder/api/anagram_handler.go:89:			processAnagrams		70.0%
+- anagram-finder/api/anagram_request.go:20:			validate		100.0%
+- anagram-finder/api/anagram_request.go:36:			validateInputType	100.0%
+- anagram-finder/api/anagram_request.go:49:			validateAlgorithm	100.0%
+- anagram-finder/api/anagram_request.go:61:			validateInputData	83.3%
+- anagram-finder/api/anagram_response.go:15:			serveResponse		100.0%
+- anagram-finder/api/error_handler.go:34:			handleError		75.0%
+- anagram-finder/pkg/anagram/factory.go:11:			NewAnagramFinderFactory	0.0%
+- anagram-finder/pkg/anagram/factory.go:15:			CreateAnagramFinder	0.0%
+- anagram-finder/pkg/anagram/sort_map_anagram_finder.go:11:	NewSortMapAnagramFinder	100.0%
+- anagram-finder/pkg/anagram/sort_map_anagram_finder.go:19:	FindAnagrams		100.0%
+- anagram-finder/pkg/anagram/sort_map_anagram_finder.go:43:	sortWord		100.0%
+- anagram-finder/pkg/inputsource/factory.go:14:			NewInputSourceFactory	0.0%
+- anagram-finder/pkg/inputsource/factory.go:18:			CreateInputSource	0.0%
+- anagram-finder/pkg/inputsource/http_body_input_source.go:11:	NewHttpBodyInputSource	100.0%
+- anagram-finder/pkg/inputsource/http_body_input_source.go:16:	GetWords		100.0%
+- anagram-finder/pkg/inputsource/http_file_input_source.go:12:	NewHttpFileInputSource	100.0%
+- anagram-finder/pkg/inputsource/http_file_input_source.go:16:	GetWords		87.5%
+- anagram-finder/pkg/inputsource/http_url_input_source.go:15:	NewHttpUrlInputSource	100.0%
+- anagram-finder/pkg/inputsource/http_url_input_source.go:19:	GetWords		84.6%
 
 
 ## Swagger Documentation
