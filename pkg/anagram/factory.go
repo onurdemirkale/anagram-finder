@@ -14,7 +14,7 @@ func NewAnagramFinderFactory() AnagramFinderFactoryInterface {
 
 func (f *AnagramFinderFactory) CreateAnagramFinder(algorithm string) (AnagramFinder, error) {
 	switch algorithm {
-	case "basic":
+	case "sort_map":
 		return NewSortMapAnagramFinder(), nil
 	default:
 		return nil, errors.New("unknown algorithm")

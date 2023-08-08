@@ -15,7 +15,7 @@ import (
 	"github.com/onurdemirkale/anagram-finder/pkg/inputsource"
 )
 
-func TestFindAnagrams(t *testing.T) {
+func Test_SortMap_FindAnagrams_BodyInput(t *testing.T) {
 	tests := []struct {
 		name           string
 		body           string
@@ -25,13 +25,13 @@ func TestFindAnagrams(t *testing.T) {
 	}{
 		{
 			name:           "Valid Request",
-			body:           `{"inputType": "http_body", "inputData": "listen,enlist,inlets,cat,silent,tac,nag a ram,anagram", "algorithm": "basic"}`,
+			body:           `{"inputType": "http_body", "inputData": "listen,enlist,inlets,cat,silent,tac,nag a ram,anagram", "algorithm": "sort_map"}`,
 			expectedCode:   http.StatusOK,
 			expectedOutput: "{\"anagramGroups\":[[\"listen\",\"enlist\",\"inlets\",\"silent\"],[\"cat\",\"tac\"],[\"nag a ram\",\"anagram\"]]}\n",
 		},
 		{
 			name:          "Invalid Input Type",
-			body:          `{"inputType": "invalid", "inputData": "listen,enlist,inlets,silent", "algorithm": "basic"}`,
+			body:          `{"inputType": "invalid", "inputData": "listen,enlist,inlets,silent", "algorithm": "sort_map"}`,
 			expectedCode:  http.StatusBadRequest,
 			expectedError: fmt.Sprintf("{\"anagramGroups\":null,\"error\":\"%s\"}", ErrInvalidInputType),
 		},
@@ -43,7 +43,7 @@ func TestFindAnagrams(t *testing.T) {
 		},
 		{
 			name:          "Invalid Input Data",
-			body:          `{"inputType": "http_body", "inputData": "invalidData", "algorithm": "basic"}`,
+			body:          `{"inputType": "http_body", "inputData": "invalidData", "algorithm": "sort_map"}`,
 			expectedCode:  http.StatusBadRequest,
 			expectedError: fmt.Sprintf("{\"anagramGroups\":null,\"error\":\"%s\"}", ErrInvalidInput),
 		},
@@ -102,7 +102,7 @@ func TestFindAnagrams_FileInput(t *testing.T) {
 			name:               "Valid File Input",
 			fileContents:       "listen\nenlist\ninlets\ncat\nsilent\ntac\nnag a ram\nanagram",
 			inputType:          "http_file",
-			algorithm:          "basic",
+			algorithm:          "sort_map",
 			expectedCode:       http.StatusOK,
 			expectedError:      nil,
 			expectedFileOutput: "{\"anagramGroups\":[[\"listen\",\"enlist\",\"inlets\",\"silent\"],[\"cat\",\"tac\"],[\"nag a ram\",\"anagram\"]]}\n",

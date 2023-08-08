@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	inputTypeFile  = "http_file"
-	inputTypeBody  = "http_body"
-	algorithmBasic = "basic"
+	inputTypeFile    = "http_file"
+	inputTypeBody    = "http_body"
+	algorithmSortMap = "sort_map"
 )
 
 type AnagramRequest struct {
@@ -48,7 +48,7 @@ func (req *AnagramRequest) validateInputType() error {
 
 func (req *AnagramRequest) validateAlgorithm() error {
 	supportedAlgorithms := map[string]bool{
-		algorithmBasic: true,
+		algorithmSortMap: true,
 	}
 
 	if !supportedAlgorithms[req.Algorithm] {
