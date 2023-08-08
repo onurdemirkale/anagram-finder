@@ -103,7 +103,7 @@ curl -X POST -H "Content-Type: multipart/form-data" \
   -F "file=@anagrams.txt" \
   -F "inputType=http_file" \
   -F "algorithm=basic" \
-  http://localhost:8080/anagram -o downloaded_anagrams.txt
+  http://localhost:8080/anagram 
 ```
 
 2. Using JSON:
@@ -132,6 +132,8 @@ http://localhost:8080/anagram \
 
 ## Test Coverage
 
+**Total Coverage**: 79.8%
+
 anagram-finder/api/anagram_handler.go:18:			NewAnagramHandler	100.0%
 anagram-finder/api/anagram_handler.go:25:			FindAnagrams		75.0%
 anagram-finder/api/anagram_handler.go:46:			parseRequest		77.3%
@@ -155,7 +157,7 @@ anagram-finder/pkg/inputsource/http_file_input_source.go:12:	NewHttpFileInputSou
 anagram-finder/pkg/inputsource/http_file_input_source.go:16:	GetWords		87.5%
 anagram-finder/pkg/inputsource/http_url_input_source.go:15:	NewHttpUrlInputSource	100.0%
 anagram-finder/pkg/inputsource/http_url_input_source.go:19:	GetWords		84.6%
-total:											(statements)		79.8%
+
 
 ## Swagger Documentation
 
