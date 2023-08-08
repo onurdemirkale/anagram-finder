@@ -1,0 +1,75 @@
+openapi: 3.0.0
+info:
+  title: Anagram API
+  version: 1.0.0
+  description: An API service to handle and identify anagrams.
+
+paths:
+  /anagram:
+    post:
+      summary: Retrieve anagrams
+      description: Submit words to retrieve their anagrams.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnagramRequest"
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                inputType:
+                  $ref: "#/components/schemas/InputType"
+                algorithm:
+                  $ref: "#/components/schemas/AlgorithmType"
+      responses:
+        "200":
+          description: Successful response with a list of anagrams.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnagramResponse"
+        "400":
+          description: Bad request, possibly due to invalid input format.
+        "500":
+          description: Server error.
+
+components:
+  schemas:
+    AnagramRequest:
+      type: object
+      properties:
+        inputType:
+          $ref: "#/components/schemas/InputType"
+        inputData:
+          type: string
+          description: Comma-separated list of words. This field should be empty if using the file input type.
+        algorithm:
+          $ref: "#/components/schemas/AlgorithmType"
+    AnagramResponse:
+      type: object
+      properties:
+        anagramGroups:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+        error:
+          type: string
+    InputType:
+      type: string
+      enum:
+        - http_body
+        - http_file
+        - http_url
+      description: Specifies the format in which the words are provided.
+    AlgorithmType:
+      type: string
+      enum:
+        - sort_map
+      description: The algorithm used to find anagrams.
