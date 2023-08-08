@@ -8,6 +8,7 @@ import (
 const (
 	inputTypeFile    = "http_file"
 	inputTypeBody    = "http_body"
+	inputTypeUrl     = "http_url"
 	algorithmSortMap = "sort_map"
 )
 
@@ -68,6 +69,10 @@ func (req *AnagramRequest) validateInputData() error {
 	case inputTypeFile:
 		if req.InputData != "" {
 			return errors.New(ErrInvalidFileInput)
+		}
+	case inputTypeUrl:
+		if req.InputData != "" {
+			return errors.New(ErrInvalidInput)
 		}
 	}
 

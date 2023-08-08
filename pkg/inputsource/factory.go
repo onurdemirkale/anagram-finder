@@ -21,6 +21,8 @@ func (f *InputSourceFactory) CreateInputSource(inputType string, inputData inter
 		return NewHttpBodyInputSource(inputData.(string)), nil
 	case "http_file":
 		return NewHttpFileInputSource(inputData.(multipart.File)), nil
+	case "http_url":
+		return NewHttpUrlInputSource(inputData.(string)), nil
 	default:
 		return nil, fmt.Errorf("unknown input type: %s", inputType)
 	}
