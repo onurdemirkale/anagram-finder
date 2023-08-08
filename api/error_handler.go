@@ -16,7 +16,7 @@ const (
 	ErrInvalidFile            = "failed to read file"
 	ErrUnsupportedContentType = "unsupported content type"
 	ErrInvalidInput           = "invalid input provided"
-	ErrInvalidInputType       = "invalid input type. supported types: http, http_file, http_url"
+	ErrInvalidInputType       = "invalid input type. supported types: http_body, http_file, http_url"
 	ErrInvalidAlgorithmType   = "invalid algorithm type. supported algorithms: basic"
 	ErrInvalidFileInput       = "input data should be empty for file input type"
 )
