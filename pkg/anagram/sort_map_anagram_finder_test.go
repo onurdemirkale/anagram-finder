@@ -62,6 +62,10 @@ func TestSortMapAnagramFinder_FindAnagrams(t *testing.T) {
 				sort.Strings(tc.expected[i])
 			}
 
+			// sort the outer slices by the first string of each inner slice
+			sort.Slice(actual, func(i, j int) bool { return actual[i][0] < actual[j][0] })
+			sort.Slice(tc.expected, func(i, j int) bool { return tc.expected[i][0] < tc.expected[j][0] })
+
 			if !reflect.DeepEqual(actual, tc.expected) {
 				t.Errorf("Expected %v, got %v", tc.expected, actual)
 			}
