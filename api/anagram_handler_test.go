@@ -43,7 +43,7 @@ func Test_SortMap_FindAnagrams_BodyInput(t *testing.T) {
 		},
 		{
 			name:          "Invalid Input Data",
-			body:          `{"inputType": "http_body", "inputData": "invalidData", "algorithm": "sort_map"}`,
+			body:          `{"inputType": "http", "inputData": "invalidData", "algorithm": "basic"}`,
 			expectedCode:  http.StatusBadRequest,
 			expectedError: fmt.Sprintf("{\"anagramGroups\":null,\"error\":\"%s\"}", ErrInvalidInput),
 		},
