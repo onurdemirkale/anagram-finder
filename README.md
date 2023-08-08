@@ -4,6 +4,8 @@ Anagram Finder is a service designed to provide anagrams for a given set of word
 
 Sort-map algorithm was chosen due to its simplicity and effectiveness. Compared to hash and trie algorithms, sort-map offered the same time complexity. Trie algorithm had the advantage of prefix searches, which would be beneficial if the functionality was to be expanded.
 
+The anagram finder and input source interfaces have been designed for extensibility, allowing to add different input sources and algorithms easily.
+
 ## Overview
 
 ```
@@ -129,6 +131,17 @@ http://localhost:8080/anagram \
   "algorithm": "sort_map"
 }'
 ```
+## Future Improvements 
+
+- Rate limiting or caching mechanism can be added for `HttpUrlInputSource` to prevent excessive network calls and to ensure performance.
+
+- Improve integration tests to include tests for `http_url` input source.
+
+- Segment `anagram_handler.go` further to separate request parsing and anagram processing logic from the handler.
+
+- Integrate a new algorithm and benchmark results.
+
+- Map-based approaches can be implemented for switch statements in inputsource and anagram factories to reduce complexity.
 
 ## Test Coverage
 
