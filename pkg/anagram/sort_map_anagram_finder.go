@@ -36,6 +36,7 @@ func (b *SortMapAnagramFinder) FindAnagrams(words []string) ([][]string, error) 
 	return result, nil
 }
 
+// todo: handles both normalization and sorting, split into two separate functions
 // sortWord takes a word as input, removes spaces, converts it to lowercase, and returns the sorted string.
 // This function is used as a helper to normalize the words for anagram comparison.
 // Time complexity: O(M*log(M)).

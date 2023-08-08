@@ -20,6 +20,7 @@ func (f *InputSourceFactory) CreateInputSource(inputType string, inputData inter
 	case "http_body":
 		return NewHttpBodyInputSource(inputData.(string)), nil
 	case "http_file":
+		// todo: add error handling for type assertion to avoid potential panics
 		return NewHttpFileInputSource(inputData.(multipart.File)), nil
 	case "http_url":
 		return NewHttpUrlInputSource(inputData.(string)), nil

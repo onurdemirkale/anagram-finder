@@ -16,6 +16,7 @@ func NewHttpUrlInputSource(url string) *HttpUrlInputSource {
 	return &HttpUrlInputSource{url: url}
 }
 
+// todo: add error checks for the response status codes
 func (hu *HttpUrlInputSource) GetWords() ([]string, error) {
 	resp, err := http.Get(hu.url)
 	if err != nil {
